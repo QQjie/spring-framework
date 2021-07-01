@@ -145,6 +145,11 @@ public abstract class AnnotationConfigUtils {
 	 * @return a Set of BeanDefinitionHolders, containing all bean definitions
 	 * that have actually been registered by this call
 	 */
+	/**
+	 * TODO huangjie
+	 * AnnotationConfigUtils#registerAnnotationConfigProcessors
+	 *
+	 */
 	public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(
 			BeanDefinitionRegistry registry, @Nullable Object source) {
 

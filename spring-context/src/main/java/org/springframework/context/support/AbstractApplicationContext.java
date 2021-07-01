@@ -39,6 +39,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -57,6 +59,8 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
+import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -530,9 +534,30 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				postProcessBeanFactory(beanFactory);
 
 				// Invoke factory processors registered as beans in the context.
+				/**
+				 *
+				 * 找到容器中所有的 实现了@see {@linkplain BeanDefinitionRegistryPostProcessor}
+				 * 和@see {@linkplain BeanFactoryPostProcessor}的对象，
+				 * 如系统默认提供的@see {@linkplain org.springframework.context.annotation.AnnotationConfigUtils#registerAnnotationConfigProcessors(BeanDefinitionRegistry)}
+				 * 如 @see {@linkplain ConfigurationClassPostProcessor} 负责容器扫描的
+				 *
+				 * 并按照一定的顺序调用他们的方法，先按优先级调用 实现了BeanDefinitionRegistryPostProcessor接口的 {@linkplain BeanDefinitionRegistryPostProcessor#postProcessBeanDefinitionRegistry
+				 *
+				 * 然后按优先级调用 @see {@linkplain org.springframework.beans.factory.config.BeanFactoryPostProcessor#postProcessBeanFactory(org.springframework.beans.factory.config.ConfigurableListableBeanFactory)
+				 *
+				 */
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
+				/**
+				 *  获取并注册BeanPostProcessors,会先从容器中找对应BeanPostProcessor，
+				 *  然后调用getBean方法（没有从单例池找到就会调用create方法进行创建）
+				 *  @see {@linkplain org.springframework.context.annotation.AnnotationConfigUtils#registerAnnotationConfigProcessors(BeanDefinitionRegistry)}
+				 * 	注册系统提供的AnnotationConfigUtils#registerAnnotationConfigProcessors方法中准备的几个BeanDefinition对象
+				 *
+				 * @see {@linkplain CommonAnnotationBeanPostProcessor}
+				 *
+				 */
 				registerBeanPostProcessors(beanFactory);
 
 				// Initialize message source for this context.
