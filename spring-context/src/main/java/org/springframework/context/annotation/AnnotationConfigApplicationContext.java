@@ -23,6 +23,8 @@ import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.type.filter.AbstractTypeHierarchyTraversingFilter;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -64,6 +66,19 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 */
 	public AnnotationConfigApplicationContext() {
 		this.reader = new AnnotatedBeanDefinitionReader(this);
+		/**
+		 * 创建对象的时候会注册AnnotationTypeFilter 9 {@linkplain ClassPathScanningCandidateComponentProvider#registerDefaultFilters()}
+		 * {@linkplain org.springframework.core.testfixture.stereotype.Component }
+		 * 如 this.includeFilters.add(new AnnotationTypeFilter(Component.class))
+		 * 用于后面扫描的时候判断是否是@Component注解的类 以便于加入容器管理
+		 * 判断的方法在 {@linkplain ClassPathScanningCandidateComponentProvider#scanCandidateComponents(java.lang.String)}
+		 * 中的 isCandidateComponent(metadataReader)  方法
+		 * {@linkplain AbstractTypeHierarchyTraversingFilter#match(org.springframework.core.type.classreading.MetadataReader, org.springframework.core.type.classreading.MetadataReaderFactory)}
+		 * {@linkplain AnnotationTypeFilter#matchSelf(org.springframework.core.type.classreading.MetadataReader)}
+		 *
+		 * this.annotationType.getName() 此时获取的annotationType就是此处add进去的Component
+		 *
+		 */
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
 
